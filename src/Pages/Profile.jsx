@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Mail, Phone, ShieldCheck, X, User } from 'lucide-react';
 
-const ProfileSlider = ({ isOpen, onClose }) => {
+const Profile = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -158,4 +158,4 @@ const ProfileSlider = ({ isOpen, onClose }) => {
   );
 };
 
-export default ProfileSlider;
+export default Profile;
