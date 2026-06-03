@@ -90,7 +90,7 @@ function App() {
           <Route path="/checkout/*" element={<Checkout />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/track-order" element={<OrderTracking />} />
-
+ <Route path="/login" element={<Login/>} />
           <Route path="/login1" element={<Login1 />} />
           <Route path="/signup" element={<Signup />} /> 
           <Route path="/profile" element={<Profile />} />
