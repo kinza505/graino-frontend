@@ -19,10 +19,10 @@ import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from './context/AuthContext';
 import Login1 from "./Pages/Login1";
 import Signup from "./Pages/Signup";
-import Profile from './pages/Profile';
+import Profile from './Pages/Profile';
 
-import Login from "./pages/Login";
-import OrderTracking from "./pages/OrderTracking";
+import Login from "./Pages/Login";
+import OrderTracking from "./Pages/OrderTracking";
 
 function HomePage() {
   return (
