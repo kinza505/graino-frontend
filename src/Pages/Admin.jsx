@@ -5,7 +5,7 @@ import {
   FileText, ChevronLeft, ChevronRight, Calendar, Menu, Edit3, X
 } from "lucide-react";
 
-import logo from "../assets/logo-2.png"; 
+import logo from "../assets/web-logo.png"; 
 import BASE_URL from "../config/api";
 
 const Admin = ({ onLogout }) => {
@@ -62,6 +62,7 @@ const Admin = ({ onLogout }) => {
     }
   };
 
+  // Logic to filter orders (Date + Status + Search)
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
       const orderDate = new Date(order.createdAt).toISOString().split("T")[0];
@@ -69,23 +70,27 @@ const Admin = ({ onLogout }) => {
       const matchesStatus = filters.status === "All" || order.status === filters.status;
       const matchesSearch = !searchTerm || 
         order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        order.firstName?.toLowerCase().includes(searchTerm.toLowerCase());
+        order.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.phone?.includes(searchTerm);
       return matchesDate && matchesStatus && matchesSearch;
     });
   }, [orders, dateRange, filters, searchTerm]);
 
+  // Pagination Logic
   const currentRecords = filteredOrders.slice((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage);
-  const reportRecords = filteredOrders.slice((reportPage - 1) * recordsPerPage, reportPage * recordsPerPage);
   const totalPages = Math.ceil(filteredOrders.length / recordsPerPage);
+  
+  const startRecord = filteredOrders.length === 0 ? 0 : (currentPage - 1) * recordsPerPage + 1;
+  const endRecord = Math.min(currentPage * recordsPerPage, filteredOrders.length);
 
   const stats = useMemo(() => ({
     total: filteredOrders.length,
     revenue: filteredOrders.reduce((acc, curr) => acc + (curr.totalPrice || 0), 0),
-    pending: orders.filter(o => o.status === "Pending").length,
-    approved: orders.filter(o => o.status === "Approved").length,
-    shipping: orders.filter(o => o.status === "Shipping").length,
-    delivered: orders.filter(o => o.status === "Delivered").length,
-  }), [filteredOrders, orders]);
+    pending: filteredOrders.filter(o => o.status === "Pending").length,
+    approved: filteredOrders.filter(o => o.status === "Approved").length,
+    shipping: filteredOrders.filter(o => o.status === "Shipping").length,
+    delivered: filteredOrders.filter(o => o.status === "Delivered").length,
+  }), [filteredOrders]);
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC] text-slate-800 font-sans text-[10px]">
@@ -109,15 +114,7 @@ const Admin = ({ onLogout }) => {
               <div className="space-y-1"><label className="font-bold text-slate-500 uppercase">Last Name</label><input type="text" value={editModal.order.lastName} onChange={(e)=>setEditModal({...editModal, order: {...editModal.order, lastName: e.target.value}})} className="w-full border p-2 rounded-lg outline-none focus:border-blue-500" /></div>
               <div className="space-y-1"><label className="font-bold text-slate-500 uppercase">Phone</label><input type="text" value={editModal.order.phone} onChange={(e)=>setEditModal({...editModal, order: {...editModal.order, phone: e.target.value}})} className="w-full border p-2 rounded-lg outline-none focus:border-blue-500" /></div>
               <div className="space-y-1"><label className="font-bold text-slate-500 uppercase">City</label><input type="text" value={editModal.order.city} onChange={(e)=>setEditModal({...editModal, order: {...editModal.order, city: e.target.value}})} className="w-full border p-2 rounded-lg outline-none focus:border-blue-500" /></div>
-              <div className="col-span-1 md:col-span-2 space-y-1"><label className="font-bold text-slate-500 uppercase">Full Address</label><textarea value={editModal.order.streetAddress || ""} onChange={(e) =>
-  setEditModal({
-    ...editModal,
-    order: {
-      ...editModal.order,
-      streetAddress: e.target.value,
-    },
-  })
-} className="w-full border p-2 rounded-lg outline-none focus:border-blue-500 h-16" /></div>
+              <div className="col-span-1 md:col-span-2 space-y-1"><label className="font-bold text-slate-500 uppercase">Full Address</label><textarea value={editModal.order.streetAddress || ""} onChange={(e) => setEditModal({ ...editModal, order: { ...editModal.order, streetAddress: e.target.value }})} className="w-full border p-2 rounded-lg outline-none focus:border-blue-500 h-16" /></div>
               <div className="space-y-1"><label className="font-bold text-slate-500 uppercase">Status</label><select value={editModal.order.status} onChange={(e)=>setEditModal({...editModal, order: {...editModal.order, status: e.target.value}})} className="w-full border p-2 rounded-lg outline-none font-bold">
                   <option value="Pending">Pending</option>
                   <option value="Approved">Approved</option>
@@ -135,7 +132,6 @@ const Admin = ({ onLogout }) => {
       )}
 
       {/* SIDEBAR */}
-      <div className={`fixed inset-0 bg-black/50 z-[100] md:hidden ${isMobileMenuOpen ? "block" : "hidden"}`} onClick={() => setIsMobileMenuOpen(false)}></div>
       <aside className={`bg-[#163D68] text-white flex flex-col fixed h-full transition-all duration-300 z-[110] 
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} 
         md:translate-x-0 ${isCollapsed ? "md:w-16" : "md:w-56"} print:hidden`}>
@@ -157,7 +153,7 @@ const Admin = ({ onLogout }) => {
 
       <main className={`flex-1 transition-all duration-300 min-w-0 ${isCollapsed ? "md:ml-16" : "md:ml-56"} p-4 md:p-6`}>
         
-        {/* Mobile Header */}
+        {/* MOBILE HEADER */}
         <div className="md:hidden flex items-center justify-between mb-4 bg-white p-3 rounded-xl shadow-sm print:hidden border border-slate-100">
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-1"><Menu size={20}/></button>
             <span className="font-black italic tracking-tighter text-[#163D68]">GRAINO ADMIN</span>
@@ -166,18 +162,19 @@ const Admin = ({ onLogout }) => {
 
         {view === "dashboard" ? (
           <>
+            {/* DASHBOARD HEADER & DATE FILTER */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 print:hidden">
               <h2 className="text-lg font-black text-[#163D68] uppercase tracking-tight">Admin Dashboard</h2>
               <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm w-full md:w-auto">
                 <Calendar size={14} className="text-blue-500" />
-                <input type="date" max={today} value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} className="bg-transparent border-none text-[10px] font-bold outline-none cursor-pointer" />
+                <input type="date" max={today} value={dateRange.start} onChange={(e) => {setDateRange({ ...dateRange, start: e.target.value }); setCurrentPage(1);}} className="bg-transparent border-none text-[10px] font-bold outline-none cursor-pointer" />
                 <span className="text-slate-300">-</span>
-                <input type="date" max={today} value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} className="bg-transparent border-none text-[10px] font-bold outline-none cursor-pointer" />
+                <input type="date" max={today} value={dateRange.end} onChange={(e) => {setDateRange({ ...dateRange, end: e.target.value }); setCurrentPage(1);}} className="bg-transparent border-none text-[10px] font-bold outline-none cursor-pointer" />
               </div>
             </div>
 
             {/* DASHBOARD STATS */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6 print:hidden">
               <MiniCard label="Total" value={stats.total} color="blue" />
               <MiniCard label="Pending" value={stats.pending} color="amber" />
               <MiniCard label="Approved" value={stats.approved} color="blue" />
@@ -189,17 +186,19 @@ const Admin = ({ onLogout }) => {
               </div>
             </div>
 
-            <div className="mb-4 relative max-w-sm">
+            {/* SEARCH BAR */}
+            <div className="mb-4 relative max-w-sm print:hidden">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-              <input type="text" placeholder="Search Order ID or Name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] outline-none shadow-sm focus:border-blue-400 transition-all" />
+              <input type="text" placeholder="Search Order ID or Name..." value={searchTerm} onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);}} className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] outline-none shadow-sm focus:border-blue-400 transition-all" />
             </div>
 
             {/* DASHBOARD TABLE */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left min-w-[600px]">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-left min-w-[800px] border-collapse">
                   <thead className="bg-slate-50 border-b text-slate-500 font-black uppercase text-[9px]">
                     <tr>
+                      <th className="px-5 py-4 w-16">Sr. No</th>
                       <th className="px-5 py-4">Order ID</th>
                       <th className="px-5 py-4">Customer</th>
                       <th className="px-5 py-4">Contact</th>
@@ -210,8 +209,9 @@ const Admin = ({ onLogout }) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {currentRecords.map((o) => (
+                    {currentRecords.map((o, index) => (
                       <tr key={o._id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-5 py-3.5 font-bold text-slate-400">{(currentPage - 1) * recordsPerPage + index + 1}</td>
                         <td className="px-5 py-3.5 font-bold text-blue-600">#{o.orderId}</td>
                         <td className="px-5 py-3.5 font-black uppercase text-slate-700">{o.firstName} {o.lastName}</td>
                         <td className="px-5 py-3.5 font-bold text-slate-500">{o.phone}</td>
@@ -221,9 +221,7 @@ const Admin = ({ onLogout }) => {
                              o.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
                           }`}>{o.status}</span>
                         </td>
-                        <td className="px-5 py-3.5 text-slate-500">
-  {o.streetAddress}
-</td>
+                        <td className="px-5 py-3.5 text-slate-500 truncate max-w-[150px]">{o.streetAddress}</td>
                         <td className="px-5 py-3.5 text-right font-black text-slate-900">Rs {o.totalPrice?.toLocaleString()}</td>
                         <td className="px-5 py-3.5">
                           <div className="flex justify-center gap-2">
@@ -236,25 +234,27 @@ const Admin = ({ onLogout }) => {
                   </tbody>
                 </table>
               </div>
-              <div className="p-4 border-t flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/30">
-                <span className="text-slate-400 font-black text-[9px] uppercase tracking-widest">Total Records: {filteredOrders.length}</span>
+              <div className="p-4 border-t flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-50/30 print:hidden">
+                <span className="text-slate-400 font-black text-[9px] uppercase tracking-widest">
+                  Showing {startRecord} to {endRecord} of {filteredOrders.length} entries
+                </span>
                 <div className="flex gap-2 items-center">
-                  <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} className="p-1.5 border rounded-lg bg-white hover:bg-slate-100 shadow-sm transition-all"><ChevronLeft size={16}/></button>
+                  <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p-1))} className="p-1.5 border rounded-lg bg-white hover:bg-slate-100 shadow-sm transition-all disabled:opacity-30"><ChevronLeft size={16}/></button>
                   <span className="px-4 py-1.5 font-black text-blue-600 bg-blue-50 rounded-lg text-[10px]">PAGE {currentPage}</span>
-                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} className="p-1.5 border rounded-lg bg-white hover:bg-slate-100 shadow-sm transition-all"><ChevronRight size={16}/></button>
+                  <button disabled={currentPage === totalPages || totalPages === 0} onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} className="p-1.5 border rounded-lg bg-white hover:bg-slate-100 shadow-sm transition-all disabled:opacity-30"><ChevronRight size={16}/></button>
                 </div>
               </div>
             </div>
           </>
         ) : (
           /* SALES REPORT */
-          <div className="bg-white border border-slate-200 p-4 md:p-8 shadow-sm min-h-screen rounded-2xl">
-            {/* LARGE FILTERS */}
+          <div className="bg-white border border-slate-200 p-4 md:p-8 shadow-sm rounded-2xl print:border-none print:p-0">
+            {/* REPORT FILTERS */}
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 mb-8 print:hidden bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Order Status</label>
-                    <select value={filters.status} onChange={(e)=>setFilters({...filters, status: e.target.value})} className="w-full border-2 border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black outline-none focus:border-blue-400 bg-white">
+                    <select value={filters.status} onChange={(e)=>{setFilters({...filters, status: e.target.value}); setReportPage(1);}} className="w-full border-2 border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black outline-none focus:border-blue-400 bg-white">
                       <option value="All">All Orders</option>
                       <option value="Pending">Pending</option>
                       <option value="Approved">Approved</option>
@@ -264,21 +264,21 @@ const Admin = ({ onLogout }) => {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">From Date</label>
-                    <input type="date" max={today} value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} className="w-full border-2 border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black outline-none focus:border-blue-400 bg-white" />
+                    <input type="date" max={today} value={dateRange.start} onChange={(e) => {setDateRange({ ...dateRange, start: e.target.value }); setReportPage(1);}} className="w-full border-2 border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black outline-none bg-white" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">To Date</label>
-                    <input type="date" max={today} value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} className="w-full border-2 border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black outline-none focus:border-blue-400 bg-white" />
+                    <input type="date" max={today} value={dateRange.end} onChange={(e) => {setDateRange({ ...dateRange, end: e.target.value }); setReportPage(1);}} className="w-full border-2 border-slate-100 rounded-xl px-4 py-2.5 text-[10px] font-black outline-none bg-white" />
                   </div>
                </div>
-               <button onClick={() => window.print()} className="w-full xl:w-auto bg-[#163D68] text-white px-8 py-3 rounded-xl flex items-center justify-center gap-3 font-black text-[10px] shadow-lg hover:bg-slate-800 transition-all active:scale-95">
-                 <Printer size={18}/> PRINT FULL REPORT
+               <button onClick={() => window.print()} className="w-full xl:w-auto bg-[#163D68] text-white px-8 py-3 rounded-xl flex items-center justify-center gap-3 font-black text-[10px] shadow-lg hover:bg-slate-800 transition-all">
+                 <Printer size={18}/> PRINT
                </button>
             </div>
 
             {/* PRINT HEADER */}
             <div className="hidden print:block text-center mb-10">
-               <img src={logo} className="w-24 mx-auto mb-2" alt="Logo" />
+               <img src={logo} className="w-33 mx-auto mb-2" alt="Logo" />
                <h1 className="text-2xl font-black text-[#163D68] uppercase tracking-[0.2em]">Graino Dough Maker</h1>
                <p className="text-[10px] text-slate-600 font-bold">44, Mumtaz Market, GT Rd, Gujranwala, 52250 | Phone: 0311 1122144</p>
                <div className="flex justify-between border-b-2 border-slate-900 mt-10 pb-1 uppercase font-black text-xs italic tracking-tighter">
@@ -288,10 +288,11 @@ const Admin = ({ onLogout }) => {
             </div>
 
             {/* SALES TABLE */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse border border-slate-200">
-                <thead>
-                  <tr className="bg-slate-100 border-b border-slate-200 font-black uppercase text-[8px] text-slate-600">
+            <div className="overflow-x-auto print:overflow-visible">
+              <table className="w-full text-left border-collapse border border-slate-200 print:border-slate-900">
+                <thead className="print:table-header-group">
+                  <tr className="bg-slate-100 border-b border-slate-200 font-black uppercase text-[8px] text-slate-600 print:bg-gray-200">
+                    <th className="p-3 border-r border-slate-200 text-center">Sr.</th>
                     <th className="p-3 border-r border-slate-200 text-center">Date</th>
                     <th className="p-3 border-r border-slate-200">Order ID</th>
                     <th className="p-3 border-r border-slate-200">Customer & Phone</th>
@@ -301,8 +302,10 @@ const Admin = ({ onLogout }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {reportRecords.map(o => (
-                    <tr key={o._id} className="border-b border-slate-200 text-[9px]">
+                  {/* SCREEN ONLY (Paginated) */}
+                  {filteredOrders.slice((reportPage - 1) * recordsPerPage, reportPage * recordsPerPage).map((o, idx) => (
+                    <tr key={o._id} className="border-b border-slate-200 text-[9px] print:hidden">
+                      <td className="p-2.5 border-r border-slate-200 text-center">{(reportPage - 1) * recordsPerPage + idx + 1}</td>
                       <td className="p-2.5 border-r border-slate-200 text-center font-medium">{new Date(o.createdAt).toLocaleDateString()}</td>
                       <td className="p-2.5 border-r border-slate-200 font-bold text-blue-700 italic">#{o.orderId}</td>
                       <td className="p-2.5 border-r border-slate-200">
@@ -317,11 +320,23 @@ const Admin = ({ onLogout }) => {
                       <td className="p-2.5 text-right font-black text-slate-900">Rs {o.totalPrice?.toLocaleString()}</td>
                     </tr>
                   ))}
+                  {/* PRINT ONLY (All Data) */}
+                  {filteredOrders.map((o, idx) => (
+                    <tr key={`print-${o._id}`} className="hidden print:table-row border-b border-gray-400 text-[9px]">
+                      <td className="p-2.5 border-r border-gray-400 text-center">{idx + 1}</td>
+                      <td className="p-2.5 border-r border-gray-400 text-center">{new Date(o.createdAt).toLocaleDateString()}</td>
+                      <td className="p-2.5 border-r border-gray-400 font-bold">#{o.orderId}</td>
+                      <td className="p-2.5 border-r border-gray-400">{o.firstName} {o.lastName} ({o.phone})</td>
+                      <td className="p-2.5 border-r border-gray-400">{o.city} - {o.streetAddress}</td>
+                      <td className="p-2.5 border-r border-gray-400 text-center uppercase">{o.status}</td>
+                      <td className="p-2.5 text-right font-bold">Rs {o.totalPrice?.toLocaleString()}</td>
+                    </tr>
+                  ))}
                 </tbody>
-                <tfoot className="bg-slate-900 text-white font-black">
+                <tfoot className="bg-[#163D68] text-white font-black print:table-footer-group">
                   <tr>
-                    <td colSpan="4" className="p-4 uppercase tracking-widest text-[9px]">Total Records Found: {filteredOrders.length}</td>
-                    <td className="p-4 border-l border-white/10 text-right uppercase tracking-widest text-[9px]">Total Amount:</td>
+                    <td colSpan="5" className="p-4 uppercase text-[9px]">Total Records: {filteredOrders.length}</td>
+                    <td className="p-4 border-l border-white/10 text-right uppercase text-[9px]">Total Amount:</td>
                     <td className="p-4 text-right text-[12px]">Rs {stats.revenue.toLocaleString()}</td>
                   </tr>
                 </tfoot>
@@ -330,9 +345,9 @@ const Admin = ({ onLogout }) => {
 
             {/* REPORT PAGINATION */}
             <div className="mt-8 flex justify-end gap-3 print:hidden items-center">
-              <span className="text-[9px] font-black text-slate-400 tracking-widest">PAGE {reportPage} OF {totalPages}</span>
-              <button onClick={() => setReportPage(p => Math.max(1, p-1))} className="p-2 border-2 rounded-xl bg-white hover:bg-slate-50 transition-all"><ChevronLeft size={16}/></button>
-              <button onClick={() => setReportPage(p => Math.min(totalPages, p+1))} className="p-2 border-2 rounded-xl bg-white hover:bg-slate-50 transition-all"><ChevronRight size={16}/></button>
+              <span className="text-[9px] font-black text-slate-400">PAGE {reportPage} OF {Math.ceil(filteredOrders.length / recordsPerPage) || 1}</span>
+              <button disabled={reportPage === 1} onClick={() => setReportPage(p => p - 1)} className="p-2 border-2 rounded-xl bg-white disabled:opacity-30"><ChevronLeft size={16}/></button>
+              <button disabled={reportPage >= Math.ceil(filteredOrders.length / recordsPerPage)} onClick={() => setReportPage(p => p + 1)} className="p-2 border-2 rounded-xl bg-white disabled:opacity-30"><ChevronRight size={16}/></button>
             </div>
           </div>
         )}
@@ -340,13 +355,16 @@ const Admin = ({ onLogout }) => {
 
       <style>{`
         @media print {
+          @page { size: A4; margin: 1cm; }
           body * { visibility: hidden; }
           main, main * { visibility: visible; }
           main { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; }
           .print\\:hidden { display: none !important; }
-          table { width: 100% !important; border-collapse: collapse !important; border: 1px solid #000 !important; }
-          th, td { border: 1px solid #ccc !important; padding: 6px !important; }
-          thead th { background-color: #f3f4f6 !important; color: #000 !important; }
+          .print\\:table-row { display: table-row !important; }
+          table { width: 100% !important; border-collapse: collapse !important; }
+          tr { page-break-inside: avoid; }
+          thead { display: table-header-group !important; }
+          tfoot { display: table-footer-group !important; }
         }
       `}</style>
     </div>
@@ -361,7 +379,7 @@ const MiniCard = ({ label, value, color }) => {
     indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100'
   };
   return (
-    <div className={`${themes[color]} p-3 rounded-xl border shadow-sm text-center transition-transform hover:scale-105 cursor-default`}>
+    <div className={`${themes[color]} p-3 rounded-xl border shadow-sm text-center`}>
       <p className="text-[8px] font-black uppercase opacity-60 mb-1 tracking-widest">{label}</p>
       <h3 className="text-[11px] font-black tracking-tight">{value}</h3>
     </div>
@@ -370,7 +388,7 @@ const MiniCard = ({ label, value, color }) => {
 
 const SidebarLink = ({ icon, label, active, onClick, collapsed }) => (
   <button onClick={onClick} className={`w-full flex items-center p-3.5 rounded-xl transition-all mb-1 ${active ? 'bg-white text-[#163D68] shadow-lg font-black' : 'text-white/60 hover:text-white hover:bg-white/5 font-bold'}`}>
-    <div className={`${active ? 'scale-110' : ''} transition-transform`}>{icon}</div>
+    <div>{icon}</div>
     <span className={`ml-3 tracking-widest uppercase text-[9px] ${collapsed ? 'md:hidden' : 'block'}`}>{label}</span>
   </button>
 );

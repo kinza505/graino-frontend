@@ -2,11 +2,11 @@ import React from "react";
 import { motion } from "framer-motion";
 
 // --- 1. SEPARATE IMPORTS ---
-import SpiralHookImg from "../assets/m1.png";
-import MixingBowlImg from "../assets/m5.png";
-import CopperMotorImg from "../assets/m4.png";
-import ControlDialImg from "../assets/m2.png";
-import SplashGuardImg from "../assets/m3.png";
+import SpiralHookImg from "../assets/machine-parts-1.png";
+import MixingBowlImg from "../assets/machine-parts-5.png";
+import CopperMotorImg from "../assets/machine-parts-4.png";
+import ControlDialImg from "../assets/machine-parts-2.png";
+import SplashGuardImg from "../assets/machine-parts-3.png";
 
 const machineParts = [
   { id: 1, name: "Top Cover Ring", image: SpiralHookImg },

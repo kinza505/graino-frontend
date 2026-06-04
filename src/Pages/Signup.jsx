@@ -83,20 +83,11 @@ const Signup = () => {
 
   return (
     // Pure White Screen
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 sm:p-8 font-sans">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 mt-18 sm:p-8 font-sans ">
       
       {/* Card: White background with a subtle border to distinguish it */}
       <div className="w-full max-w-md bg-white rounded-[32px] sm:rounded-[40px] border border-gray-200 shadow-[0_15px_40px_rgba(0,0,0,0.04)] p-6 sm:p-10 relative">
         
-        {/* Back Button */}
-        <button
-          onClick={() => navigate("/login1")}
-          className="group mb-6 flex items-center text-[#163D68]/60 hover:text-[#EA9E26] transition-colors"
-        >
-          <ArrowLeft size={22} className="group-hover:-translate-x-1 transition-transform" />
-          <span className="ml-2 text-sm font-semibold">Back</span>
-        </button>
-
         {/* Header */}
         <div className="text-center mb-8">
           <h2 className="text-2xl sm:text-4xl font-black text-[#163D68] tracking-tight">

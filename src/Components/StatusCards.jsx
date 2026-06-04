@@ -18,7 +18,7 @@ const StatusCards = ({ stats, filters, setFilters, ordersCount }) => {
       <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4 print:hidden">
         <div>
           <h2 className="text-2xl font-black text-[#163D68]">Order Analytics</h2>
-          <p className="text-slate-400 font-medium italic">Manage and track your dough maker orders.</p>
+          <p className="text-slate-400 font-medium italic">Manage and track your dough mixer orders.</p>
         </div>
         <div className="bg-[#163D68] p-4 rounded-2xl shadow-xl text-white min-w-[220px] border-l-4 border-blue-400">
           <p className="text-[10px] font-bold text-blue-300 uppercase mb-1 tracking-widest">Revenue (Filtered)</p>

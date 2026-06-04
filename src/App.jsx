@@ -40,22 +40,17 @@ function HomePage() {
 function App() {
   const location = useLocation();
 
-  // 1. Check paths for Navbar hiding
+  // Yahan logic update kia hai: Ab sirf Checkout aur Admin par Navbar hide hoga
   const isCheckout = !!matchPath("/checkout/*", location.pathname);
   const isAdminPath = !!matchPath("/admin/*", location.pathname);
-  const isLoginPath = !!matchPath("/login1", location.pathname);
-  const isSignupPath = !!matchPath("/signup", location.pathname);
   
-  // Yahan se isCartPath ko hideNavbar logic se nikaal diya gaya hai
-  const hideNavbar = isCheckout || isAdminPath || isLoginPath || isSignupPath;
+  // Login1 aur Signup ko yahan se hata diya taake Navbar dikhe
+  const hideNavbar = isCheckout || isAdminPath;
 
-  // Footer sirf Admin page par hide hoga
   const hideFooter = isAdminPath;
 
-  // auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // check login on refresh
   useEffect(() => {
     const auth = localStorage.getItem("isAdminLoggedIn");
     if (auth === "true") {
@@ -63,13 +58,11 @@ function App() {
     }
   }, []);
 
-  // login handler
   const handleLogin = () => {
     setIsAuthenticated(true);
     localStorage.setItem("isAdminLoggedIn", "true");
   };
 
-  // logout handler
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("isAdminLoggedIn");
@@ -79,10 +72,8 @@ function App() {
     <AuthProvider>
       <CartProvider>
 
-        {/* Navbar ab Cart page par bhi dikhegi */}
+        {/* Navbar aur WhatsApp ab login/signup par bhi dikhenge */}
         {!hideNavbar && <Navbar />}
-        
-        {/* WhatsApp Widget bhi Navbar ki tarah behaviour follow karega */}
         {!hideNavbar && <WhatsAppWidget />}
 
         <Routes>
@@ -90,7 +81,7 @@ function App() {
           <Route path="/checkout/*" element={<Checkout />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/track-order" element={<OrderTracking />} />
- <Route path="/login" element={<Login/>} />
+          <Route path="/login" element={<Login/>} />
           <Route path="/login1" element={<Login1 />} />
           <Route path="/signup" element={<Signup />} /> 
           <Route path="/profile" element={<Profile />} />
@@ -107,7 +98,6 @@ function App() {
           />
         </Routes>
 
-        {/* Footer sirf Admin panel ke ilawa sab jagah dikhega */}
         {!hideFooter && <Footer />}
 
       </CartProvider>

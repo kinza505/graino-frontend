@@ -18,11 +18,12 @@ import {
 import gsap from "gsap";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import logo from "../assets/logo-2.png";
+import { useNavigate, useLocation } from "react-router-dom";
+import logo from "../assets/web-logo.png";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const {
     cart,
@@ -50,14 +51,50 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "Features", href: "#features" },
-    { name: "How It Works", href: "#how-to-work" },
-    { name: "Machine Anatomy", href: "#machine-parts" }, 
-    { name: "Reviews", href: "#reviews" },
-    { name: "FAQ", href: "#faq" },
+    { name: "Features", href: "/#features" },
+    { name: "How It Works", href: "/#how-to-work" },
+    { name: "Machine Anatomy", href: "/#machine-parts" }, 
+    { name: "Reviews", href: "/#reviews" },
+    { name: "FAQ", href: "/#faq" },
   ];
 
-  // Function to handle tracking access control
+  // --- NEW: Reset Scroll to Top on Page Change ---
+  useEffect(() => {
+    // Agar URL mein hash (#) nahi hai, toh top par scroll karo
+    if (!location.hash) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      // Agar hash hai, toh us element tak smooth scroll karo
+      const id = location.hash.replace("#", "");
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location.pathname, location.hash]);
+
+  const handleNavClick = (e, href) => {
+    e.preventDefault(); // Default jump roko
+    setIsMenuOpen(false);
+    
+    if (href.startsWith("/#")) {
+      const id = href.replace("/#", "");
+      if (location.pathname === "/") {
+        // Agar pehle se home par hain toh sirf scroll karo
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        // Agar kisi aur page par hain toh home par bhej do hash ke sath
+        navigate(href);
+      }
+    } else if (href === "/") {
+      navigate("/");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const handleTrackOrderClick = () => {
     if (user) {
       navigate("/track-order");
@@ -118,14 +155,20 @@ const Navbar = () => {
             <div className="lg:hidden text-[#163D68] cursor-pointer" onClick={() => setIsMenuOpen(true)}>
               <Menu size={26} />
             </div>
-            <div onClick={() => navigate("/")} className="cursor-pointer">
+            <div onClick={() => { navigate("/"); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="cursor-pointer">
               <img src={logo} alt="Logo" className="w-24 md:w-32 lg:w-40 transition-all duration-300" />
             </div>
           </div>
 
+          {/* DESKTOP LINKS */}
           <div className="hidden lg:flex items-center gap-6">
             {navLinks.map((link) => (
-              <a key={link.name} href={link.href} className="text-[#163D68] font-bold hover:text-[#EA9E26] transition-colors text-[12px] uppercase tracking-wider">
+              <a 
+                key={link.name} 
+                href={link.href} 
+                onClick={(e) => handleNavClick(e, link.href)}
+                className="text-[#163D68] font-bold hover:text-[#EA9E26] transition-colors text-[12px] uppercase tracking-wider"
+              >
                 {link.name}
               </a>
             ))}
@@ -162,7 +205,7 @@ const Navbar = () => {
               )}
             </div>
 
-            <button onClick={() => user ? navigate("/cart") : setShowLoginPopup(true)} className="hidden sm:block bg-[#163D68] text-white px-5 py-2 rounded-full font-bold text-[11px] uppercase hover:bg-[#EA9E26] transition-all tracking-wider shadow-md">
+            <button onClick={() => user ? navigate("/checkout") : setShowLoginPopup(true)} className="hidden sm:block bg-[#163D68] text-white px-5 py-2 rounded-full font-bold text-[11px] uppercase hover:bg-[#EA9E26] transition-all tracking-wider shadow-md">
               Order Now
             </button>
           </div>
@@ -261,45 +304,51 @@ const Navbar = () => {
         </div>
         <div className="flex-1 p-6 space-y-5">
           {navLinks.map((link) => (
-            <a key={link.name} href={link.href} onClick={() => setIsMenuOpen(false)} className="block text-[11px] font-bold text-[#163D68] uppercase tracking-widest hover:text-[#EA9E26] transition-colors">{link.name}</a>
+            <a 
+              key={link.name} 
+              href={link.href} 
+              onClick={(e) => handleNavClick(e, link.href)} 
+              className="block text-[11px] font-bold text-[#163D68] uppercase tracking-widest hover:text-[#EA9E26] transition-colors"
+            >
+              {link.name}
+            </a>
           ))}
           
           <div onClick={handleTrackOrderClick} className="flex items-center gap-2 text-[11px] font-bold text-[#163D68] uppercase tracking-widest cursor-pointer hover:text-[#EA9E26]">
             <Package size={16} /> Track Order
           </div>
 
-          <button onClick={() => { setIsMenuOpen(false); user ? navigate("/checkout") : setShowLoginPopup(true); }} className="w-full py-3 bg-[#163D68] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest shadow-md">Order Now</button>
+          <button onClick={() => { setIsMenuOpen(false); user ? navigate("/cart") : setShowLoginPopup(true); }} className="w-full py-3 bg-[#163D68] text-white rounded-lg font-bold text-[10px] uppercase tracking-widest shadow-md">Order Now</button>
         </div>
       </div>
 
-      {/* --- LARGE LOGOUT POPUP --- */}
+      {/* --- POPUPS --- */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-10 max-w-[400px] w-full shadow-[0_20px_50px_rgba(0,0,0,0.2)] text-center border border-slate-100 animate-in fade-in zoom-in duration-300">
+          <div className="bg-white rounded-3xl p-10 max-w-[400px] w-full shadow-[0_20px_50px_rgba(0,0,0,0.2)] text-center border border-slate-100">
             <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5">
               <LogOut size={40} />
             </div>
             <h3 className="text-xl font-black text-[#163D68] uppercase tracking-tight">Are you sure?</h3>
-            <p className="text-gray-500 text-sm mt-3 mb-8 leading-relaxed">You will need to login again to access your account and track your orders.</p>
+            <p className="text-gray-500 text-sm mt-3 mb-8 leading-relaxed">You will need to login again to access your account.</p>
             <div className="flex flex-col gap-3">
-              <button onClick={handleLogout} className="w-full py-4 bg-red-500 text-white rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg shadow-red-100">Yes, Logout Now</button>
+              <button onClick={handleLogout} className="w-full py-4 bg-red-500 text-white rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-red-600 transition-all shadow-lg">Yes, Logout Now</button>
               <button onClick={() => setShowLogoutConfirm(false)} className="w-full py-3 text-gray-400 text-xs font-bold uppercase hover:text-[#163D68] transition-colors">No, Stay Logged In</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* --- LARGE LOGIN POPUP --- */}
       {showLoginPopup && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-10 max-w-[400px] w-full shadow-[0_20px_50px_rgba(0,0,0,0.2)] text-center border border-slate-100 animate-in fade-in zoom-in duration-300">
+          <div className="bg-white rounded-3xl p-10 max-w-[400px] w-full shadow-[0_20px_50px_rgba(0,0,0,0.2)] text-center border border-slate-100">
             <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-5">
               <LogIn size={40} />
             </div>
             <h3 className="text-xl font-black text-[#163D68] uppercase tracking-tight">Login Required</h3>
-            <p className="text-gray-500 text-sm mt-3 mb-8 leading-relaxed">Please login to your account to track your orders or complete your purchase.</p>
+            <p className="text-gray-500 text-sm mt-3 mb-8 leading-relaxed">Please login to your account to continue.</p>
             <div className="flex flex-col gap-3">
-              <button onClick={() => { setShowLoginPopup(false); navigate("/login1"); }} className="w-full py-4 bg-[#163D68] text-white rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-[#EA9E26] transition-all shadow-lg shadow-blue-100">Go to Login Page</button>
+              <button onClick={() => { setShowLoginPopup(false); navigate("/login1"); }} className="w-full py-4 bg-[#163D68] text-white rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-[#EA9E26] transition-all shadow-lg">Go to Login Page</button>
               <button onClick={() => setShowLoginPopup(false)} className="w-full py-3 text-gray-400 text-xs font-bold uppercase hover:text-[#163D68] transition-colors">Maybe Later</button>
             </div>
           </div>

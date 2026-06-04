@@ -4,10 +4,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
-import STEP_1 from "../assets/how-1.png";
-import STEP_2 from "../assets/how-2.png";
-import STEP_3 from "../assets/how-3.png";
-import STEP_4 from "../assets/how-4.png";
+import STEP_1 from "../assets/how-to-work-1.png";
+import STEP_2 from "../assets/how-to-work-2.png";
+import STEP_3 from "../assets/how-to-work-3.png";
+import STEP_4 from "../assets/how-to-work-4.png";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -48,7 +48,7 @@ const HowItWorks = () => {
   
   const navigate = useNavigate();
   const currentContent = content[lang];
-
+const isUrdu = lang === 'ur';
   const handleOrderNow = () => {
     navigate("/cart");
   };
@@ -88,13 +88,16 @@ const HowItWorks = () => {
   }, [lang]);
 
   return (
-    <section 
-      ref={containerRef} 
-      // Sans-serif font family applied here
-      style={{ fontFamily: "'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}
-      className={`relative bg-[#F8FAFC] py-16 md:py-24 px-4 sm:px-8 md:px-20 overflow-hidden ${lang === 'ur' ? 'text-right' : 'text-left'}`}
-      dir={lang === 'ur' ? 'rtl' : 'ltr'}
-    >
+<section
+  ref={containerRef}
+  style={{
+    fontFamily: "'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+  }}
+  className={`relative bg-[#F8FAFC] py-16 md:py-24 px-4 sm:px-8 md:px-20 overflow-hidden ${
+    isUrdu ? 'text-right' : 'text-left'
+  }`}
+  dir={isUrdu ? 'rtl' : 'ltr'}
+>
       
       {/* Background Heading - Responsive Text Size */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 opacity-[0.03] select-none pointer-events-none">
@@ -106,7 +109,7 @@ const HowItWorks = () => {
       {/* Header */}
       <div className="text-center mb-12 md:mb-20 relative z-10 max-w-4xl mx-auto">
         <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-[#163D68] mb-4">
-          {currentContent.heading}<span className="text-[#EA9E26]">؟</span>
+          {currentContent.heading}
         </h2>
         <p className="text-[#EA9E26] font-bold text-lg md:text-xl mb-4">{currentContent.subHeading}</p>
         <p className="text-gray-600 text-base md:text-lg leading-relaxed mb-8 px-4">

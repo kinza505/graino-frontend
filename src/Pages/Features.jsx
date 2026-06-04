@@ -5,12 +5,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Zap, Smile, ShieldCheck, Timer, Droplets, Sparkles } from "lucide-react";
 
 // --- Image Assets ---
-import img1 from "../assets/how-3.png"; 
-import img2 from "../assets/how-7.png"; 
-import img3 from "../assets/how-5.png"; 
-import img4 from "../assets/how-4.png"; 
-import img5 from "../assets/how-2.png"; 
-import img6 from "../assets/how-8.png"; 
+import img1 from "../assets/how-to-work-3.png"; 
+import img2 from "../assets/how-to-work-7.png"; 
+import img3 from "../assets/how-to-work-5.png"; 
+import img4 from "../assets/how-to-work-4.png"; 
+import img5 from "../assets/how-to-work-2.png"; 
+import img6 from "../assets/how-to-work-7.png"; 
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -58,7 +58,7 @@ const parts = [
   {
     id: 6,
     title: "Non-Stick Technology",
-    desc: "Graino's premium steel grinder blade ensures the dough stays gathered in one place and doesn't stick to the bowl, making it mess-free and easy to remove.",
+    desc: "Graino's premium steel grinder blade ensures the dough stays gathered in one place and doesn't stick to the bowl, making it mess free and easy to remove.",
     icon: <Sparkles className="text-[#EA9E26]" />, 
     image: img6, 
     tag: "Zero Stick"
@@ -94,7 +94,7 @@ const Features = () => {
           Premium Features<span className="text-[#EA9E26]">.</span>
         </h2>
         <p className="text-gray-500 mt-4 max-w-2xl mx-auto text-sm sm:text-base md:text-lg font-medium px-4">
-          The Graino Doughmixer is engineered for efficiency, combining high-capacity performance with easy-to-use smart controls.
+          The Graino Doughmixer is engineered for efficiency, combining high capacity performance with easy to use smart controls.
         </p>
       </div>
 

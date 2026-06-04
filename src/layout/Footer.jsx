@@ -56,11 +56,11 @@ const Footer = () => {
                 {/* LEFT SIDE */}
                 <motion.div variants={itemVariants}>
                     <h2 className="text-3xl font-black mb-6 text-[#163D68]">
-                        GRAINO DOUGH MAKER<span className="text-[#EA9E26]">.</span>
+                        GRAINO DOUGH MIXER<span className="text-[#EA9E26]">.</span>
                     </h2>
 
                     <p className="text-slate-600 mb-6 text-sm leading-relaxed text-justify">
-                        Graino Dough Maker is designed to bring bakery level perfection straight into your kitchen.
+                        Graino Dough Mixer is designed to bring bakery level perfection straight into your kitchen.
                         With powerful motor performance, smooth mixing technology, and consistent kneading results,
                         it saves your time while ensuring professional quality dough every single time.
                         Whether you are preparing bread, pizza, or traditional recipes, graino delivers unmatched
@@ -130,9 +130,17 @@ const Footer = () => {
             {/* FOOTER BOTTOM */}
             <hr className="my-10 border-slate-200" />
 
-            <div className="text-center text-sm text-slate-400 font-medium">
-                © {new Date().getFullYear()} Graino Dough Maker. All Rights Reserved.
-            </div>
+          <div className="text-center text-sm text-slate-400 font-medium">
+  © {new Date().getFullYear()} Graino Dough Mixer. All Rights Reserved, Developed with ❤️ by{" "}
+  <a
+    href="https://technicmentors.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-[#EA9E26] hover:underline"
+  >
+    Technic Mentors
+  </a>
+</div>
         </footer>
     );
 };
